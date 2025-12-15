@@ -1,0 +1,45 @@
+# ActivityWatch Server Configuration
+[activitywatch]
+host = "localhost"
+port = 5600
+
+# S3 Storage Configuration
+[storage.s3]
+enable = true
+bucket = "aw-screenshots"
+region = "us-east-1"
+endpoint = "https://s3.amazonaws.com"
+access_key = "RcnYyA731sZuwpPdrVUo"
+secret_key = "7RNiSmeZvWy4HVDtbA92nkKglT6pXhuJBw0rzfcx"
+
+# Local Storage Configuration
+[storage.local]
+enable = false
+path = "/path/to/local/storage"
+
+# Screenshot Configuration
+[monitors.GS27QK_2560x1440_0_0]
+enable = true
+# Interval between checks (milliseconds)
+interval = 1000
+# Interval between forced screenshots (milliseconds)
+heartbeat_interval = 30000
+# DHash resolution (pixels)
+dhash_resolution = 16
+# DHash threshold (0-255)
+dhash_threshold = 10
+
+[monitors.GS27QK_2560x1440_-2560_0]
+enable = true
+# Interval between checks (milliseconds)
+interval = 1000
+# Interval between forced screenshots (milliseconds)
+heartbeat_interval = 30000
+# DHash resolution (pixels)
+dhash_resolution = 12
+# DHash threshold (0-255)
+dhash_threshold = 10
+
+# Logging Configuration
+[logging]
+level = "info"  # trace, debug, info, warn, error
