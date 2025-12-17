@@ -1,6 +1,7 @@
 use anyhow::{Context, Result};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
+use std::fmt;
 use std::fs;
 use std::path::Path;
 
@@ -50,6 +51,16 @@ pub struct MonitorConfig {
     pub dhash_threshold: u32,
 }
 
+impl fmt::Display for MonitorConfig {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "interval={}ms, enforce={}ms, resolution={}, threshold={}",
+            self.interval, self.enforce_interval, self.dhash_resolution, self.dhash_threshold
+        )
+    }
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct WindowConfig {
     pub enable: bool,
@@ -58,6 +69,20 @@ pub struct WindowConfig {
     pub dhash_resolution: u32,
     pub dhash_threshold: u32,
     pub enable_ocr: bool,
+}
+
+impl fmt::Display for WindowConfig {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "interval={}ms, enforce={}ms, resolution={}, threshold={}, ocr={}",
+            self.interval,
+            self.enforce_interval,
+            self.dhash_resolution,
+            self.dhash_threshold,
+            self.enable_ocr
+        )
+    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
