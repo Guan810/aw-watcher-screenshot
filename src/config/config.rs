@@ -9,6 +9,7 @@ pub struct Config {
     pub activitywatch: ActivityWatchConfig,
     pub storage: StorageConfig,
     pub monitors: HashMap<String, MonitorConfig>,
+    pub window: WindowConfig,
     pub logging: LoggingConfig,
 }
 
@@ -47,6 +48,16 @@ pub struct MonitorConfig {
     pub enforce_interval: u64,
     pub dhash_resolution: u32,
     pub dhash_threshold: u32,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct WindowConfig {
+    pub enable: bool,
+    pub interval: u64,
+    pub enforce_interval: u64,
+    pub dhash_resolution: u32,
+    pub dhash_threshold: u32,
+    pub enable_ocr: bool,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -142,6 +153,14 @@ impl Default for Config {
                 },
             },
             monitors,
+            window: WindowConfig {
+                enable: false,
+                interval: 1000,
+                enforce_interval: 30000,
+                dhash_resolution: 16,
+                dhash_threshold: 10,
+                enable_ocr: false,
+            },
             logging: LoggingConfig {
                 level: "info".to_string(),
             },

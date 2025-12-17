@@ -9,20 +9,20 @@ use crate::event::CaptureResult;
 
 pub struct SafeMonitor {
     id: String,
-    config: MonitorConfig,
     monitor: Monitor,
 
     last_capture_time: Option<DateTime<Utc>>,
     last_capture_dhash: Option<u64>,
 }
 
+// Monitor ID format: "name_width_height_x_y" (e.g., "DP-1_1920_1080_0_0")
 static RE: LazyLock<regex::Regex> = LazyLock::new(|| {
     regex::Regex::new(r"(?P<name>.+)_(?P<w>\d+)_(?P<h>\d+)_(?P<x>-?\d+)_(?P<y>-?\d+)")
         .expect("invalid regex")
 });
 
 impl SafeMonitor {
-    pub fn new(monitor_id: String, config: MonitorConfig) -> Result<Self> {
+    pub fn new(monitor_id: String) -> Result<Self> {
         let (name, width, height, x, y) = Self::parse_id(&monitor_id)?;
         let monitor = Monitor::from_point(x, y)?;
 
@@ -32,11 +32,13 @@ impl SafeMonitor {
 
         if monitor_name != name || monitor_width != width || monitor_height != height {
             return Err(anyhow!(
-                "Monitor mismatch: expected {}x{} at ({},{}), got {}x{}",
+                "Monitor mismatch: expected '{}' ({}x{}) at ({},{}), got '{}' ({}x{})",
+                name,
                 width,
                 height,
                 x,
                 y,
+                monitor_name,
                 monitor_width,
                 monitor_height
             ));
@@ -44,7 +46,6 @@ impl SafeMonitor {
 
         Ok(SafeMonitor {
             id: monitor_id,
-            config,
             monitor: monitor,
             last_capture_time: None,
             last_capture_dhash: None,
@@ -63,23 +64,32 @@ impl SafeMonitor {
         Ok((name, width, height, x, y))
     }
 
-    pub fn capture_once(&mut self) -> Result<Option<CaptureResult>> {
+    pub fn capture_once(
+        &mut self,
+        enforce_interval: u64,
+        dhash_threshold: u32,
+        dhash_resolution: u32,
+    ) -> Result<Option<CaptureResult>> {
         let now = Utc::now();
 
         let image = self
             .monitor
             .capture_image()
-            .map_err(|_| anyhow!("Failed to capture image"))?;
+            .map_err(|e| anyhow!("Failed to capture image: {}", e))?;
 
-        let dhash = crate::capture::utils::dHash(&image, self.config.dhash_resolution);
+        let dhash = crate::capture::utils::dHash(&image, dhash_resolution);
 
         if let Some(last_time) = self.last_capture_time {
-            if let Some(ref last_hash) = self.last_capture_dhash {
-                let delta = (now - last_time).num_milliseconds() as u64;
-                let time_too_soon = delta < self.config.enforce_interval;
+            if let Some(last_hash) = self.last_capture_dhash {
+                let delta = (now - last_time).num_milliseconds();
+                if delta < 0 {
+                    last_time = now;
+                    return Err(anyhow!("Clock went backwards, reset to {}", last_time));
+                }
+                let delta = delta as u64;
+                let time_too_soon = delta < enforce_interval;
 
-                let hash_too_similar =
-                    hamming_distance(dhash, last_hash.clone()) < self.config.dhash_threshold;
+                let hash_too_similar = hamming_distance(dhash, last_hash) < dhash_threshold;
                 if time_too_soon && hash_too_similar {
                     return Ok(None);
                 }
