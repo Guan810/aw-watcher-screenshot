@@ -1,13 +1,15 @@
-use anyhow::{Result, anyhow};
-use std::sync::{Arc, LazyLock, RwLock};
+use std::collections::HashMap;
+use std::sync::{Arc, RwLock};
 use xcap::Window;
 
 pub struct SafeWindows {
     window: HashMap<String, Arc<RwLock<Window>>>,
 }
 
-impl WindowCapture {
-    pub fn new(window: Window) -> Self {
-        Self { window }
+impl SafeWindows {
+    pub fn new() -> Self {
+        Self {
+            window: HashMap::new(),
+        }
     }
 }

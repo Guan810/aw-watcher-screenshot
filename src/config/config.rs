@@ -44,7 +44,7 @@ pub struct LocalConfig {
 pub struct MonitorConfig {
     pub enable: bool,
     pub interval: u64,
-    pub heartbeat_interval: u64,
+    pub enforce_interval: u64,
     pub dhash_resolution: u32,
     pub dhash_threshold: u32,
 }
@@ -116,7 +116,7 @@ impl Default for Config {
             MonitorConfig {
                 enable: true,
                 interval: 1000,
-                heartbeat_interval: 30000,
+                enforce_interval: 30000,
                 dhash_resolution: 16,
                 dhash_threshold: 10,
             },

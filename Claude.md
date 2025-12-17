@@ -10,10 +10,10 @@
 
 ## Dev Requirements
 
-- Current Dev OS: Windows 11
+- Current Dev OS: Fedora
 - Using rust
-- rustc 1.91.1 (ed61e7d7e 2025-11-07)
-- cargo 1.91.1 (ea2d97820 2025-10-10)
+- rustc 1.92.0 (ded5c06cf 2025-12-08)
+- cargo 1.92.0 (344c4567c 2025-10-21)
 
 ## Principle
 
