@@ -10,6 +10,8 @@ use tokio::sync::mpsc;
 
 #[tokio::main]
 async fn main() -> Result<()> {
+    // 初始化日志
+    tracing_subscriber::fmt::init();
     // 加载配置
     let config = Config::load_from("config/config.toml")?;
 

@@ -31,17 +31,17 @@ impl Capture {
         info!("Initializing monitor configurations...");
         for (monitor_id, config) in monitor_configs {
             if config.enable {
-                configs.insert(monitor_id, config);
                 info!(
                     "Initialized monitor configuration for {}: {}",
-                    monitor_id, config
+                    monitor_id, &config
                 );
+                configs.insert(monitor_id, config);
             }
         }
         info!("Initialized monitor configurations: {}", configs.len());
 
         info!("Initializing window configuration...");
-        if let Some(config) = window_config {
+        if let Some(ref config) = window_config {
             if config.enable {
                 info!("Initialized window configuration: {}", config);
             }
