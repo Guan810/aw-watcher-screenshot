@@ -11,7 +11,8 @@ pub fn init(config: &LoggingConfig) {
     fmt()
         .with_env_filter(filter)
         .with_target(true)
-        .with_thread_ids(false)
+        .with_thread_names(true)
+        .with_file(true)
         .with_line_number(true)
         .init();
 }

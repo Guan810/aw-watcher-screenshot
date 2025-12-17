@@ -1,6 +1,7 @@
 use anyhow::{Result, anyhow};
 use chrono::{DateTime, Utc};
 use std::sync::LazyLock;
+use tracing::info;
 use xcap::Monitor;
 
 use crate::capture::utils::hamming_distance;
@@ -14,6 +15,9 @@ pub struct SafeMonitor {
     last_capture_dhash: Option<u64>,
 }
 
+// SAFETY: Monitor 的底层句柄在单个任务中独占使用,不会跨线程共享
+unsafe impl Send for SafeMonitor {}
+
 // Monitor ID format: "name_width_height_x_y" (e.g., "DP-1_1920_1080_0_0")
 static RE: LazyLock<regex::Regex> = LazyLock::new(|| {
     regex::Regex::new(r"(?P<name>.+)_(?P<w>\d+)_(?P<h>\d+)_(?P<x>-?\d+)_(?P<y>-?\d+)")
@@ -22,6 +26,7 @@ static RE: LazyLock<regex::Regex> = LazyLock::new(|| {
 
 impl SafeMonitor {
     pub fn new(monitor_id: String) -> Result<Self> {
+        info!("Creating SafeMonitor for {}", monitor_id);
         let (name, width, height, x, y) = Self::parse_id(&monitor_id)?;
         let monitor = Monitor::from_point(x, y)?;
 
@@ -42,6 +47,8 @@ impl SafeMonitor {
                 monitor_height
             ));
         }
+
+        info!("SafeMonitor created for {}", monitor_id);
 
         Ok(SafeMonitor {
             id: monitor_id,
@@ -70,6 +77,7 @@ impl SafeMonitor {
         dhash_resolution: u32,
     ) -> Result<Option<CaptureResult>> {
         let now = Utc::now();
+        info!("Starting capture in {}, {}", self.id, now);
 
         let image = self
             .monitor
@@ -77,6 +85,7 @@ impl SafeMonitor {
             .map_err(|e| anyhow!("Failed to capture image: {}", e))?;
 
         let dhash = crate::capture::utils::dHash(&image, dhash_resolution);
+        info!("Captured image with dHash {}", dhash);
 
         if let Some(last_time) = self.last_capture_time {
             if let Some(last_hash) = self.last_capture_dhash {
@@ -89,11 +98,19 @@ impl SafeMonitor {
                 let time_too_soon = delta < enforce_interval;
 
                 let hash_too_similar = hamming_distance(dhash, last_hash) < dhash_threshold;
+                info!(
+                    "Time too soon: {}, hash too similar: {}",
+                    time_too_soon, hash_too_similar
+                );
                 if time_too_soon && hash_too_similar {
                     return Ok(None);
                 }
             }
         }
+        info!(
+            "Current capture in {} should save which dHash is {}",
+            self.id, dhash
+        );
 
         self.last_capture_time = Some(now);
         self.last_capture_dhash = Some(dhash);

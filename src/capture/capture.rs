@@ -28,11 +28,25 @@ impl Capture {
     ) -> Self {
         let mut configs = HashMap::new();
 
+        info!("Initializing monitor configurations...");
         for (monitor_id, config) in monitor_configs {
             if config.enable {
                 configs.insert(monitor_id, config);
+                info!(
+                    "Initialized monitor configuration for {}: {}",
+                    monitor_id, config
+                );
             }
         }
+        info!("Initialized monitor configurations: {}", configs.len());
+
+        info!("Initializing window configuration...");
+        if let Some(config) = window_config {
+            if config.enable {
+                info!("Initialized window configuration: {}", config);
+            }
+        }
+        info!("Initialized window configuration");
 
         Self {
             monitor_configs: configs,
@@ -50,6 +64,7 @@ impl Capture {
 
         // 启动所有监视器任务
         for (monitor_id, config) in &self.monitor_configs {
+            info!("Starting monitor capture loop for {}", monitor_id);
             let monitor = match SafeMonitor::new(monitor_id.clone()) {
                 Ok(m) => m,
                 Err(e) => {
@@ -71,6 +86,7 @@ impl Capture {
         }
 
         // 启动窗口任务(如果启用)
+        info!("Starting window capture loop");
         if let Some(config) = &self.window_config {
             if config.enable {
                 let sender = sender.clone();
