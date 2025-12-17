@@ -5,7 +5,7 @@ port = 5600
 
 # S3 Storage Configuration
 [storage.s3]
-enable = true
+enable = false
 bucket = "aw-screenshots"
 region = "us-east-1"
 endpoint = "https://s3.amazonaws.com"
@@ -14,31 +14,42 @@ secret_key = "7RNiSmeZvWy4HVDtbA92nkKglT6pXhuJBw0rzfcx"
 
 # Local Storage Configuration
 [storage.local]
-enable = false
-path = "/path/to/local/storage"
+enable = true
+path = "./test/pics"
 
-# Screenshot Configuration
-[monitors.GS27QK_2560x1440_0_0]
+# Monitor Screenshot Configuration
+# Format: monitors.{monitor_name}_{width}x{height}_{x}_{y}
+[monitors.GS27QK_2560_1440_0_0]
 enable = true
 # Interval between checks (milliseconds)
 interval = 1000
-# Interval between forced screenshots (milliseconds)
-heartbeat_interval = 30000
+# Minimum interval between screenshots (milliseconds)
+enforce_interval = 30000
 # DHash resolution (pixels)
 dhash_resolution = 16
-# DHash threshold (0-255)
+# DHash threshold (0-255, lower = more sensitive)
 dhash_threshold = 10
 
-[monitors.GS27QK_2560x1440_-2560_0]
+[monitors.GS27QK_2560_1440_-2560_0]
 enable = true
+interval = 1000
+enforce_interval = 30000
+dhash_resolution = 12
+dhash_threshold = 10
+
+# Window Screenshot Configuration (focused window only)
+[window]
+enable = false
 # Interval between checks (milliseconds)
 interval = 1000
-# Interval between forced screenshots (milliseconds)
-heartbeat_interval = 30000
+# Minimum interval between screenshots (milliseconds)
+enforce_interval = 30000
 # DHash resolution (pixels)
-dhash_resolution = 12
-# DHash threshold (0-255)
+dhash_resolution = 16
+# DHash threshold (0-255, lower = more sensitive)
 dhash_threshold = 10
+# Enable OCR on captured windows (not yet implemented)
+enable_ocr = false
 
 # Logging Configuration
 [logging]

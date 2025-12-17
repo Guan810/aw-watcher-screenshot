@@ -4,7 +4,6 @@ use std::sync::LazyLock;
 use xcap::Monitor;
 
 use crate::capture::utils::hamming_distance;
-use crate::config::MonitorConfig;
 use crate::event::CaptureResult;
 
 pub struct SafeMonitor {
@@ -83,8 +82,8 @@ impl SafeMonitor {
             if let Some(last_hash) = self.last_capture_dhash {
                 let delta = (now - last_time).num_milliseconds();
                 if delta < 0 {
-                    last_time = now;
-                    return Err(anyhow!("Clock went backwards, reset to {}", last_time));
+                    self.last_capture_time = Some(now);
+                    return Err(anyhow!("Clock went backwards, reset to {}", now));
                 }
                 let delta = delta as u64;
                 let time_too_soon = delta < enforce_interval;

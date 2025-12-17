@@ -1,6 +1,5 @@
 use anyhow::{Result, anyhow};
 use chrono::{DateTime, Utc};
-use image::RgbaImage;
 use xcap::Window;
 
 use crate::capture::utils::hamming_distance;
