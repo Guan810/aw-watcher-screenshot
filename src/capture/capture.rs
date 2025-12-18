@@ -5,6 +5,7 @@ use tokio::task::JoinHandle;
 use tokio::time::{Duration, sleep};
 use tokio_util::sync::CancellationToken;
 use tracing::{debug, error, info, warn};
+use xcap::Monitor;
 
 use crate::capture::monitor::SafeMonitor;
 use crate::capture::window::SafeWindow;
@@ -323,6 +324,25 @@ impl Capture {
             .as_ref()
             .map(|handles| handles.len())
             .unwrap_or(0)
+    }
+
+    /// 获取目前连接的显示器ID
+    pub fn get_all_monitors_id() -> Result<Vec<String>> {
+        let monitors = Monitor::all()?;
+        let monitor_ids: Vec<String> = monitors
+            .iter()
+            .map(|m| {
+                format!(
+                    "{}_{}_{}_{}_{}",
+                    m.name(),
+                    m.width(),
+                    m.height(),
+                    m.x(),
+                    m.y()
+                )
+            })
+            .collect();
+        Ok(monitor_ids)
     }
 }
 
